@@ -5,87 +5,42 @@ import { assets } from "../../assets/assets_admin/assets";
 import MRIReferralFormDisplay from "../../pages/admin/MRIReferralFormDisplay";
 
 const AllAppointments = () => {
-  const { aToken, appointments, getAllAppointments, cancelAppointments } = useContext(AdminContext);
+  const { aToken, appointments, getAllAppointments, cancelAppointments } =
+    useContext(AdminContext);
   const { currency } = useContext(AppContext);
-
+  
+  // State for MRI data popup only
   const [showModal, setShowModal] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState(null);
 
+  // Function to show complete MRI form data
   const showMRIFormData = (appointment) => {
-    console.log("Selected appointment MRI data:", appointment.mriFormData);
+    console.log("Selected appointment MRI data:", appointment.mriFormData); // Debug log
     setSelectedAppointment(appointment);
     setShowModal(true);
   };
 
+  // Function to close modal
   const closeModal = () => {
     setShowModal(false);
     setSelectedAppointment(null);
   };
 
+  // FIXED: Check if appointment has MRI referral data - only check for mriFormData existence
   const hasMRIReferral = (appointment) => {
-    return appointment.mriFormData &&
-      typeof appointment.mriFormData === "object" &&
-      Object.keys(appointment.mriFormData).length > 0;
-  };
-
-  const renderDoctors = (item) => {
-    if (item.selectedDoctors && Array.isArray(item.selectedDoctors) && item.selectedDoctors.length > 0) {
-      return (
-        <div className="flex flex-col gap-1">
-          {item.selectedDoctors.map((doctor, index) => (
-            <div key={doctor._id || index} className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${
-                doctor._id === item.docId ? "bg-green-500" : "bg-blue-500"
-              }`} />
-              <span className={`text-sm ${
-                doctor._id === item.docId ? "font-semibold text-green-700" : "text-gray-700"
-              }`}>
-                {doctor.name}
-              </span>
-              {doctor._id === item.docId && (
-                <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
-                  Primary
-                </span>
-              )}
-            </div>
-          ))}
-          <div className="text-xs text-gray-500 mt-1">
-            Total: {item.selectedDoctors.length} doctor{item.selectedDoctors.length > 1 ? "s" : ""}
-          </div>
-        </div>
-      );
-    }
-
-    return (
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-blue-500" />
-        <span className="text-sm text-gray-700">
-          {item.docData?.name || "Doctor Name Not Available"}
-        </span>
-      </div>
-    );
-  };
-
-  const renderFees = (item) => {
-    if (item.selectedDoctors && Array.isArray(item.selectedDoctors) && item.selectedDoctors.length > 1) {
-      const totalFees = item.selectedDoctors.reduce((sum, doctor) => sum + (doctor.fees || 0), 0);
-      return (
-        <div className="flex flex-col text-right">
-          <span className="font-semibold text-gray-900">
-            {currency}{totalFees}
-          </span>
-          <span className="text-xs text-gray-500">
-            ({item.selectedDoctors.length} doctors)
-          </span>
-        </div>
-      );
-    }
-
-    return (
-      <span className="font-semibold text-gray-900">
-        {currency}{item.amount}
-      </span>
-    );
+    const hasData = appointment.mriFormData && 
+                   typeof appointment.mriFormData === 'object' &&
+                   Object.keys(appointment.mriFormData).length > 0;
+    
+    // Debug log to see what's happening
+    console.log("Checking MRI data for appointment:", {
+      hasFlag: appointment.hasMRIReferral,
+      hasFormData: !!appointment.mriFormData,
+      formDataKeys: appointment.mriFormData ? Object.keys(appointment.mriFormData).length : 0,
+      result: hasData
+    });
+    
+    return hasData;
   };
 
   useEffect(() => {
@@ -94,6 +49,7 @@ const AllAppointments = () => {
     }
   }, [aToken]);
 
+  // Debug log to see all appointments
   useEffect(() => {
     console.log("All appointments:", appointments);
   }, [appointments]);
@@ -102,11 +58,11 @@ const AllAppointments = () => {
     <div className="w-full max-w-7xl m-5">
       <p className="mb-3 text-lg font-medium">All Appointments</p>
       <div className="bg-white border rounded text-sm overflow-y-scroll max-h-[80vh] min-h-[60vh]">
-        <div className="hidden sm:grid grid-cols-[0.5fr_2fr_1.5fr_3fr_1.2fr_2fr_1.5fr] grid-flow-col py-3 px-6 border-b">
+        <div className="hidden sm:grid grid-cols-[0.5fr_2.5fr_2fr_2.5fr_1fr_2fr_1.5fr] grid-flow-col py-3 px-6 border-b">
           <p>#</p>
           <p>Client</p>
           <p>Date & Time</p>
-          <p>Doctors</p>
+          <p>Service name</p>
           <p>Fees</p>
           <p>Form Details</p>
           <p>Actions</p>
@@ -114,7 +70,7 @@ const AllAppointments = () => {
 
         {appointments.slice().reverse().map((item, index) => (
           <div
-            className="flex flex-wrap justify-between items-center sm:grid sm:grid-cols-[0.5fr_2fr_1.5fr_3fr_1.2fr_2fr_1.5fr] text-gray-600 border-b px-6 py-4 hover:bg-gray-50"
+            className="flex flex-wrap justify-between items-center sm:grid sm:grid-cols-[0.5fr_2.5fr_2fr_2.5fr_1fr_2fr_1.5fr] text-gray-600 border-b px-6 py-3 hover:bg-gray-100"
             key={index}
           >
             <p className="max-sm:hidden">{index + 1}</p>
@@ -126,25 +82,27 @@ const AllAppointments = () => {
                   src={item.userData.image}
                   alt="User"
                 />
-                <p className="font-medium">{item.userData.name}</p>
+                <p>{item.userData.name}</p>
               </div>
               <p className="ml-10 text-xs text-gray-400">{item.userData.phone}</p>
             </div>
 
-            <div className="text-sm">
-              <p className="font-medium">{item.slotTime}</p>
-              <p className="text-gray-500">{item.slotDate}</p>
+            <p>
+              {item.slotTime}, {item.slotDate}
+            </p>
+
+            <div className="flex items-center gap-2">
+              <p>{item.docData.name}</p>
             </div>
 
-            <div className="flex items-start">
-              {renderDoctors(item)}
-            </div>
+            <p>
+              {currency}
+              {item.amount}
+            </p>
 
-            <div className="text-right">
-              {renderFees(item)}
-            </div>
-
+            {/* Form Details Column */}
             <div className="flex flex-col gap-2">
+              {/* MRI Referral Button */}
               {hasMRIReferral(item) && (
                 <button
                   onClick={() => showMRIFormData(item)}
@@ -156,9 +114,19 @@ const AllAppointments = () => {
                   MRI Form
                 </button>
               )}
+              
+              {/* Show debug info for troubleshooting */}
+              <div className="text-xs text-gray-400">
+                {item.mriFormData ? (
+                  <span className="text-blue-500">Has form data ({Object.keys(item.mriFormData).length} fields)</span>
+                ) : (
+                  <span>No form data</span>
+                )}
+              </div>
             </div>
 
-            <div className="flex items-center justify-center">
+            {/* Actions Column */}
+            <div className="flex items-center">
               {item.cancelled ? (
                 <p className="text-red-500 text-sm font-medium">Cancelled</p>
               ) : item.isCompleted ? (
@@ -176,6 +144,7 @@ const AllAppointments = () => {
         ))}
       </div>
 
+      {/* MRI Form Modal */}
       {showModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-6xl w-full shadow-2xl max-h-[95vh] overflow-hidden flex flex-col">
@@ -192,9 +161,11 @@ const AllAppointments = () => {
                 </svg>
               </button>
             </div>
+            
             <div className="flex-1 overflow-y-auto p-6">
               <MRIReferralFormDisplay formData={selectedAppointment.mriFormData} />
             </div>
+
             <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
               <button
                 onClick={closeModal}

@@ -15,13 +15,7 @@ const appointmentSchema = new mongoose.Schema({
         ref: 'Doctor'
       },
       name: String,
-      fees: Number,
-      speciality: String, // Added for multiple doctor support
-      image: String, // Added for multiple doctor support
-      isPrimary: { 
-        type: Boolean, 
-        default: false 
-      } // Added to identify primary doctor
+      fees: Number
     }
   ],
   date: { type: Number, required: true },
@@ -30,20 +24,6 @@ const appointmentSchema = new mongoose.Schema({
   payment: { type: Boolean, default: false },
   isCompleted: { type: Boolean, default: false },
   
-  // Added fields for multiple doctor support
-  totalFees: {
-    type: Number,
-    default: function() {
-      return this.amount || 0;
-    }
-  },
-  
-  isMultiDoctorAppointment: {
-    type: Boolean,
-    default: function() {
-      return this.selectedDoctors && this.selectedDoctors.length > 1;
-    }
-  },
 
   // Enhanced MRI form data structure - updated to match the form
   hasMRIReferral: { type: Boolean, default: false },
@@ -212,31 +192,12 @@ appointmentSchema.index({ hasMRIReferral: 1 });
 appointmentSchema.index({ 'mriFormData.submissionDate': -1 });
 appointmentSchema.index({ 'mriFormData.priority': 1 });
 appointmentSchema.index({ 'mriFormData.isWsibClaim': 1 });
-// Added indexes for multiple doctor support
-appointmentSchema.index({ 'selectedDoctors._id': 1 });
-appointmentSchema.index({ isMultiDoctorAppointment: 1 });
 
 // Pre-save middleware to update lastModified date
 appointmentSchema.pre('save', function(next) {
-  // Existing MRI form logic
   if (this.isModified('mriFormData')) {
     this.mriFormData.lastModified = new Date();
   }
-  
-  // Added logic for multiple doctors
-  if (this.isModified('selectedDoctors')) {
-    this.totalFees = this.calculateTotalFees();
-    this.isMultiDoctorAppointment = this.selectedDoctors && this.selectedDoctors.length > 1;
-    
-    // Ensure at least one doctor is marked as primary
-    if (this.selectedDoctors && this.selectedDoctors.length > 0) {
-      const hasPrimary = this.selectedDoctors.some(doc => doc.isPrimary);
-      if (!hasPrimary) {
-        this.selectedDoctors[0].isPrimary = true;
-      }
-    }
-  }
-  
   next();
 });
 
@@ -274,30 +235,6 @@ appointmentSchema.methods.getPriorityLevel = function() {
   };
   
   return priorityMap[this.mriFormData.priority] || 5;
-};
-
-// Added methods for multiple doctor support
-appointmentSchema.methods.calculateTotalFees = function() {
-  if (this.selectedDoctors && this.selectedDoctors.length > 0) {
-    return this.selectedDoctors.reduce((total, doctor) => {
-      return total + (doctor.fees || 0);
-    }, 0);
-  }
-  return this.amount || 0;
-};
-
-// Method to get primary doctor
-appointmentSchema.methods.getPrimaryDoctor = function() {
-  if (this.selectedDoctors && this.selectedDoctors.length > 0) {
-    const primary = this.selectedDoctors.find(doc => doc.isPrimary);
-    return primary || this.selectedDoctors[0];
-  }
-  return null;
-};
-
-// Method to check if appointment has multiple doctors
-appointmentSchema.methods.hasMultipleDoctors = function() {
-  return this.selectedDoctors && this.selectedDoctors.length > 1;
 };
 
 const appointmentModel = mongoose.models.appointment || mongoose.model('appointment', appointmentSchema);

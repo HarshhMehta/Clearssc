@@ -105,7 +105,7 @@ const Appointment = () => {
     if (isSelected) {
       // If trying to remove primary doctor, show message
       if (doctor._id === docId) {
-        toast.info("Primary doctor cannot be removed. You can add additional doctors to your appointment.");
+        toast.info("Primary doctor cannot be removed. You can add additional Services to your appointment.");
         return;
       }
       removeDoctor(doctor._id);
@@ -191,7 +191,7 @@ const Appointment = () => {
     // Check if any selected doctor is not available
     const unavailableDoctors = selectedDoctors.filter(doctor => !doctor.available);
     if (unavailableDoctors.length > 0) {
-      toast.error(`Some selected doctors are not available: ${unavailableDoctors.map(d => d.name).join(', ')}`);
+      toast.error(`Some selected Services are not available: ${unavailableDoctors.map(d => d.name).join(', ')}`);
       return;
     }
 
@@ -204,7 +204,7 @@ const Appointment = () => {
     if (selectedDoctors.length > 1) {
       const doctorNames = selectedDoctors.map(d => d.name).join(', ');
       const confirmed = window.confirm(
-        `You are booking appointments with ${selectedDoctors.length} doctors:\n\n${doctorNames}\n\nTotal Fee: ${currencySymbol}${calculateTotalFees()}\n\nProceed to fill the referral form?`
+        `You are booking appointments with ${selectedDoctors.length} Services:\n\n${doctorNames}\n\nTotal Fee: ${currencySymbol}${calculateTotalFees()}\n\nProceed to fill the referral form?`
       );
       
       if (!confirmed) {
@@ -304,7 +304,7 @@ const Appointment = () => {
               slotDate,
               slotTime,
               mriFormData,
-              message: `Multi-doctor appointment session with ${selectedDoctors.length} doctors`,
+              message: `Multi-doctor appointment session with ${selectedDoctors.length} Services`,
             },
             {
               headers: { Authorization: `Bearer ${token}` },
@@ -439,12 +439,12 @@ const Appointment = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
-              {showDoctorSelector ? 'Hide Doctor Selection' : 'Add More Doctors'}
+              {showDoctorSelector ? 'Hide Doctor Selection' : 'Add More Services'}
             </button>
             
             {selectedDoctors.length > 1 && (
               <div className="text-sm text-gray-600 bg-blue-50 px-4 py-2 rounded-lg">
-                {selectedDoctors.length} doctors selected
+                {selectedDoctors.length} Service selected
               </div>
             )}
           </div>
@@ -453,7 +453,7 @@ const Appointment = () => {
           {selectedDoctors.length > 0 && (
             <div className="bg-white border border-gray-200 rounded-xl p-6 mb-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Selected Doctors ({selectedDoctors.length})
+                Selected Services ({selectedDoctors.length})
               </h3>
               
               <div className="space-y-3">
@@ -525,7 +525,7 @@ const Appointment = () => {
           {/* Doctor Selection Interface */}
           {showDoctorSelector && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Add More Doctors</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Add More Services</h2>
               
               {/* Search and Filter */}
               <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -533,7 +533,7 @@ const Appointment = () => {
                   <div className="relative">
                     <input
                       type="text"
-                      placeholder="Search doctors by name or specialty..."
+                      placeholder="Search Services by name..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -567,11 +567,11 @@ const Appointment = () => {
                     onClick={() => {
                       const availableDoctors = filteredDoctors.filter(doc => doc.available && !selectedDoctors.some(d => d._id === doc._id));
                       if (availableDoctors.length === 0) {
-                        toast.info("All available doctors are already selected");
+                        toast.info("All available Services are already selected");
                         return;
                       }
                       setSelectedDoctors(prev => [...prev, ...availableDoctors]);
-                      toast.success(`Added ${availableDoctors.length} doctors to your appointment`);
+                      toast.success(`Added ${availableDoctors.length} Services to your appointment`);
                     }}
                     className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                   >
@@ -586,7 +586,7 @@ const Appointment = () => {
                       onClick={() => {
                         const primaryDoc = selectedDoctors.find(d => d._id === docId);
                         setSelectedDoctors(primaryDoc ? [primaryDoc] : []);
-                        toast.success("Cleared all additional doctors (kept primary doctor)");
+                        toast.success("Cleared all additional Services (kept primary Service)");
                       }}
                       className="px-4 py-2 bg-red-600 text-white text-sm rounded-lg hover:bg-red-700 transition-colors flex items-center gap-2"
                     >
@@ -737,7 +737,7 @@ const Appointment = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                     </svg>
                   </div>
-                  <p className="text-gray-500">No doctors found matching your criteria</p>
+                  <p className="text-gray-500">No Services found matching your criteria</p>
                 </div>
               )}
             </div>
@@ -754,7 +754,7 @@ const Appointment = () => {
               Select your preferred date and time for the consultation
               {selectedDoctors.length > 1 && (
                 <span className="block text-blue-600 font-medium mt-1">
-                  Showing slots available for all {selectedDoctors.length} selected doctors
+                  Showing slots available for all {selectedDoctors.length} selected Services
                 </span>
               )}
             </p>
@@ -838,7 +838,7 @@ const Appointment = () => {
                       </div>
                       <p className="text-gray-500 text-sm sm:text-base">
                         {selectedDoctors.length > 1 
-                          ? "No common available slots for all selected doctors on this date"
+                          ? "No common available slots for all selected Services on this date"
                           : "No available slots for this date"
                         }
                       </p>
@@ -859,7 +859,7 @@ const Appointment = () => {
                   <div className="space-y-3 mb-6">
                     {selectedDoctors.length > 1 ? (
                       <div className="py-2 border-b border-gray-200">
-                        <span className="text-sm text-gray-600 block mb-2">Selected Doctors</span>
+                        <span className="text-sm text-gray-600 block mb-2">Selected Services</span>
                         <div className="space-y-1">
                           {selectedDoctors.map((doctor) => (
                             <div key={doctor._id} className="flex justify-between items-center text-sm">
@@ -871,7 +871,7 @@ const Appointment = () => {
                       </div>
                     ) : (
                       <div className="flex justify-between items-center py-2 border-b border-gray-200">
-                        <span className="text-sm text-gray-600">Doctor</span>
+                        <span className="text-sm text-gray-600">Services</span>
                         <span className="text-sm font-medium text-gray-900">{primaryDoctor.name}</span>
                       </div>
                     )}
