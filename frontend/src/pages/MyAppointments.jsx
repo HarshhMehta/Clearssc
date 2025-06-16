@@ -192,12 +192,7 @@ const MyAppointments = () => {
                     <span className="font-medium text-zinc-700">Fee: </span>
                     <span className="text-gray-900 font-semibold">${item.amount}</span>
                   </p>
-                  {item.message && (
-                    <p>
-                      <span className="font-medium text-zinc-700">Message: </span>
-                      <span className="text-gray-700">{item.message}</span>
-                    </p>
-                  )}
+                 
                   {item.paymentCompletedAt && (
                     <p>
                       <span className="font-medium text-zinc-700">Paid on: </span>

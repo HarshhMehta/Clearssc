@@ -2,54 +2,119 @@ import React, { useContext, useEffect, useState } from "react";
 import { AdminContext } from "../../context/AdminContext";
 import { AppContext } from "../../context/AppContext";
 import { assets } from "../../assets/assets_admin/assets";
+import MRIReferralFormDisplay from "../../pages/admin/MRIReferralFormDisplay";
 
 const AllAppointments = () => {
-  const { aToken, appointments, getAllAppointments, cancelAppointments } =
-    useContext(AdminContext);
+  const { aToken, appointments, getAllAppointments, cancelAppointments } = useContext(AdminContext);
   const { currency } = useContext(AppContext);
-  
-  // State for message popup
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [selectedMessage, setSelectedMessage] = useState("");
-  const [selectedPatient, setSelectedPatient] = useState("");
 
-  // Function to show message popup
-  const showMessage = (message, patientName) => {
-    setSelectedMessage(message);
-    setSelectedPatient(patientName);
-    setShowMessageModal(true);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  const showMRIFormData = (appointment) => {
+    console.log("Selected appointment MRI data:", appointment.mriFormData);
+    setSelectedAppointment(appointment);
+    setShowModal(true);
   };
 
-  // Function to close message popup
-  const closeMessageModal = () => {
-    setShowMessageModal(false);
-    setSelectedMessage("");
-    setSelectedPatient("");
+  const closeModal = () => {
+    setShowModal(false);
+    setSelectedAppointment(null);
+  };
+
+  const hasMRIReferral = (appointment) => {
+    return appointment.mriFormData &&
+      typeof appointment.mriFormData === "object" &&
+      Object.keys(appointment.mriFormData).length > 0;
+  };
+
+  const renderDoctors = (item) => {
+    if (item.selectedDoctors && Array.isArray(item.selectedDoctors) && item.selectedDoctors.length > 0) {
+      return (
+        <div className="flex flex-col gap-1">
+          {item.selectedDoctors.map((doctor, index) => (
+            <div key={doctor._id || index} className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${
+                doctor._id === item.docId ? "bg-green-500" : "bg-blue-500"
+              }`} />
+              <span className={`text-sm ${
+                doctor._id === item.docId ? "font-semibold text-green-700" : "text-gray-700"
+              }`}>
+                {doctor.name}
+              </span>
+              {doctor._id === item.docId && (
+                <span className="text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded-full">
+                  Primary
+                </span>
+              )}
+            </div>
+          ))}
+          <div className="text-xs text-gray-500 mt-1">
+            Total: {item.selectedDoctors.length} doctor{item.selectedDoctors.length > 1 ? "s" : ""}
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full bg-blue-500" />
+        <span className="text-sm text-gray-700">
+          {item.docData?.name || "Doctor Name Not Available"}
+        </span>
+      </div>
+    );
+  };
+
+  const renderFees = (item) => {
+    if (item.selectedDoctors && Array.isArray(item.selectedDoctors) && item.selectedDoctors.length > 1) {
+      const totalFees = item.selectedDoctors.reduce((sum, doctor) => sum + (doctor.fees || 0), 0);
+      return (
+        <div className="flex flex-col text-right">
+          <span className="font-semibold text-gray-900">
+            {currency}{totalFees}
+          </span>
+          <span className="text-xs text-gray-500">
+            ({item.selectedDoctors.length} doctors)
+          </span>
+        </div>
+      );
+    }
+
+    return (
+      <span className="font-semibold text-gray-900">
+        {currency}{item.amount}
+      </span>
+    );
   };
 
   useEffect(() => {
     if (aToken) {
       getAllAppointments();
     }
-  }, [aToken, appointments]);
+  }, [aToken]);
+
+  useEffect(() => {
+    console.log("All appointments:", appointments);
+  }, [appointments]);
 
   return (
-    <div className="w-full max-w-6xl m-5">
+    <div className="w-full max-w-7xl m-5">
       <p className="mb-3 text-lg font-medium">All Appointments</p>
       <div className="bg-white border rounded text-sm overflow-y-scroll max-h-[80vh] min-h-[60vh]">
-        <div className="hidden sm:grid grid-cols-[0.5fr_2.5fr_2.5fr_3fr_1fr_1.5fr_1.5fr] grid-flow-col py-3 px-6 border-b">
+        <div className="hidden sm:grid grid-cols-[0.5fr_2fr_1.5fr_3fr_1.2fr_2fr_1.5fr] grid-flow-col py-3 px-6 border-b">
           <p>#</p>
           <p>Client</p>
           <p>Date & Time</p>
-          <p>Service name</p>
+          <p>Doctors</p>
           <p>Fees</p>
-          <p>Message</p>
+          <p>Form Details</p>
           <p>Actions</p>
         </div>
 
         {appointments.slice().reverse().map((item, index) => (
           <div
-            className="flex flex-wrap justify-between items-center sm:grid sm:grid-cols-[0.5fr_2.5fr_2.5fr_3fr_1fr_1.5fr_1.5fr] text-gray-600 border-b px-6 py-3 hover:bg-gray-100"
+            className="flex flex-wrap justify-between items-center sm:grid sm:grid-cols-[0.5fr_2fr_1.5fr_3fr_1.2fr_2fr_1.5fr] text-gray-600 border-b px-6 py-4 hover:bg-gray-50"
             key={index}
           >
             <p className="max-sm:hidden">{index + 1}</p>
@@ -61,43 +126,39 @@ const AllAppointments = () => {
                   src={item.userData.image}
                   alt="User"
                 />
-                <p>{item.userData.name}</p>
+                <p className="font-medium">{item.userData.name}</p>
               </div>
               <p className="ml-10 text-xs text-gray-400">{item.userData.phone}</p>
             </div>
 
-            <p>
-              {item.slotTime}, {item.slotDate}
-            </p>
-
-            <div className="flex items-center gap-2">
-              <p>{item.docData.name}</p>
+            <div className="text-sm">
+              <p className="font-medium">{item.slotTime}</p>
+              <p className="text-gray-500">{item.slotDate}</p>
             </div>
 
-            <p>
-              {currency}
-              {item.amount}
-            </p>
+            <div className="flex items-start">
+              {renderDoctors(item)}
+            </div>
 
-            {/* Message Column */}
-            <div className="flex items-center">
-              {item.message ? (
+            <div className="text-right">
+              {renderFees(item)}
+            </div>
+
+            <div className="flex flex-col gap-2">
+              {hasMRIReferral(item) && (
                 <button
-                  onClick={() => showMessage(item.message, item.userData.name)}
-                  className="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-blue-200 transition-colors flex items-center gap-1"
+                  onClick={() => showMRIFormData(item)}
+                  className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs font-medium hover:bg-green-200 transition-colors flex items-center gap-1 justify-center"
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                   </svg>
-                  View Message
+                  MRI Form
                 </button>
-              ) : (
-                <span className="text-gray-400 text-xs italic">No message</span>
               )}
             </div>
 
-            {/* Actions Column */}
-            <div className="flex items-center">
+            <div className="flex items-center justify-center">
               {item.cancelled ? (
                 <p className="text-red-500 text-sm font-medium">Cancelled</p>
               ) : item.isCompleted ? (
@@ -115,40 +176,28 @@ const AllAppointments = () => {
         ))}
       </div>
 
-      {/* Message Modal */}
-      {showMessageModal && (
+      {showModal && selectedAppointment && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl max-w-lg w-full p-6 shadow-2xl max-h-[80vh] overflow-y-auto">
-            <div className="flex items-center justify-between mb-4">
+          <div className="bg-white rounded-xl max-w-6xl w-full shadow-2xl max-h-[95vh] overflow-hidden flex flex-col">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 bg-gray-50">
               <h3 className="text-xl font-semibold text-gray-800">
-                Patient Message
+                MRI Referral Form - {selectedAppointment?.userData?.name}
               </h3>
               <button
-                onClick={closeMessageModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                onClick={closeModal}
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-full"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            
-            <div className="mb-4">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                <p className="font-medium text-gray-700">From: {selectedPatient}</p>
-              </div>
-              
-              <div className="bg-gray-50 rounded-lg p-4 border-l-4 border-blue-500">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                  {selectedMessage}
-                </p>
-              </div>
+            <div className="flex-1 overflow-y-auto p-6">
+              <MRIReferralFormDisplay formData={selectedAppointment.mriFormData} />
             </div>
-
-            <div className="flex justify-end">
+            <div className="flex justify-end p-6 border-t border-gray-200 bg-gray-50">
               <button
-                onClick={closeMessageModal}
+                onClick={closeModal}
                 className="px-6 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors font-medium"
               >
                 Close

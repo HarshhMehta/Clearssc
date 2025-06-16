@@ -6,15 +6,15 @@ const Header = () => {
   const navigate = useNavigate(); // ✅ Initializing navigate
 
   return (
-    <div style={{ backgroundColor: "#141B31" }} className="min-h-screen w-full">
-      <div className="flex flex-col md:flex-row flex-wrap rounded-lg px-6 md:px-10 lg:px-20 mt-0 mb-5 mx-12 sm:mx-24 md:mx-28 lg:mx-32">
+    <div style={{ backgroundColor: "#141B31" }} className=" pt-10 w-full">
+      <div className="flex flex-col md:flex-row flex-wrap rounded-lg px-6 md:px-10 lg:px-20 pt-20 pb-20 mx-12 sm:mx-24 md:mx-28 lg:mx-32">
         {/* ----- Left Side ----- */}
-        <div className="md:w-1/2 flex flex-col items-center md:items-start justify-center gap-4 py-10 m-auto md:py-[10vw] md:mb-[-110px]">
+        <div className="md:w-1/2 flex flex-col items-center md:items-start justify-center gap-4 py-8 m-auto md:py-12">
           <p className="text-white text-3xl md:text-4xl lg:text-6xl font-semibold leading-tight md:leading-tight lg:leading-tight">
             Book Your <br />
-            Screening{" "}
+            {" "}
             <span style={{ color: "#D0E057" }} className="text-highlight">
-              MRI
+              MRI Scan
             </span>{" "}
             Today!
           </p>
@@ -43,13 +43,18 @@ const Header = () => {
           </a>
         </div>
 
-        {/* ----- Right Side ----- */}
-        <div className="md:w-1/2 relative flex justify-center md:block">
-          <img
-            className="w-full max-w-sm md:max-w-full md:absolute bottom-0 h-auto rounded-lg"
-            src={assets.header_img}
-            alt="MRI Machine"
-          />
+        {/* ----- Right Side with Video ----- */}
+        <div className="md:w-1/2 relative flex justify-center md:block pb-8 md:pb-0">
+          <video
+            className="w-full max-w-md md:max-w-none md:w-[120%] md:absolute md:top-8 h-auto rounded-lg"
+            src="/src/assets/assets_frontend/MRI.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
+          >
+            Your browser does not support the video tag.
+          </video>
         </div>
       </div>
     </div>

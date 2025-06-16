@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 
-export default function FAQ() {
+export default function  FAQ() {
   const [openIndex, setOpenIndex] = useState(null)
 
   const faqs = [

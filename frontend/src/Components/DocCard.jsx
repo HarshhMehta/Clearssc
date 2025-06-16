@@ -8,15 +8,48 @@ const DocCard = ({ doctor }) => {
   const doctorName = doctor?.name || "Doctor Name";
   const doctorSpeciality = doctor?.speciality || doctor?.specialty || "Speciality";
   const doctorFees = doctor?.fees || "Fees not available";
-  const doctorImage = doctor?.image || "/default-doctor.jpg";
   const doctorAbout = doctor?.about || "No information available";
   const isAvailable = doctor?.available !== undefined ? doctor.available : true;
   const doctorId = doctor?._id || doctor?.id;
+
+  // Construct the correct image URL
+  const getImageUrl = () => {
+    if (doctor?.image) {
+      // If the image path already includes the full URL, use it as is
+      if (doctor.image.startsWith('http')) {
+        return doctor.image;
+      }
+      
+      // If it's just a filename or relative path, construct the full URL
+      // Remove leading slash if present to avoid double slashes
+      const imagePath = doctor.image.startsWith('/') ? doctor.image.slice(1) : doctor.image;
+      
+      // Construct full URL to your backend (Vite environment variable)
+      const baseUrl = import.meta.env.VITE_BACKEND_URL;
+      return `${baseUrl}/${imagePath}`;
+    }
+    
+    // Default fallback image
+    return "/default-doctor.jpg";
+  };
+
+  const doctorImage = getImageUrl();
 
   const handleCardClick = () => {
     if (doctorId) {
       navigate(`/appointment/${doctorId}`);
       scrollTo(0, 0);
+    }
+  };
+
+  const handleImageError = (e) => {
+    console.log('Image failed to load:', e.target.src);
+    // Try alternative fallback
+    if (!e.target.src.includes('default-doctor.jpg')) {
+      e.target.src = "/default-doctor.jpg";
+    } else {
+      // If even the default fails, use a placeholder
+      e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' font-size='14' text-anchor='middle' dy='.3em' fill='%23374151'%3ENo Image%3C/text%3E%3C/svg%3E";
     }
   };
 
@@ -31,9 +64,8 @@ const DocCard = ({ doctor }) => {
           className="w-full h-48 object-cover" 
           src={doctorImage} 
           alt={doctorName}
-          onError={(e) => {
-            e.target.src = "https://api.neohospital.com/uploads/Service/image-1718691221278-475456045-MRI.jpg"; // Fallback image
-          }}
+          onError={handleImageError}
+          onLoad={() => console.log('Image loaded successfully:', doctorImage)}
         />
       </div>
 
@@ -75,6 +107,8 @@ const DocCard = ({ doctor }) => {
             : doctorAbout
           }
         </p>
+
+        
       </div>
     </div>
   );

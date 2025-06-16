@@ -1,8 +1,21 @@
 import React from "react";
 import { assets } from "../assets/assets_frontend/assets";
-import { Link } from 'react-router-dom';
 
 const Footer = () => {
+  // Smooth scroll to section with offset for sticky navbar
+  const scrollToSection = (sectionId) => {
+    const element = document.getElementById(sectionId);
+    if (element) {
+      const navbarHeight = 100; // Adjust this value based on your navbar height
+      const elementPosition = element.offsetTop - navbarHeight;
+      
+      window.scrollTo({
+        top: elementPosition,
+        behavior: 'smooth'
+      });
+    }
+  };
+
   return (
     <footer
       style={{ backgroundColor: "rgb(20, 27, 49)" }}
@@ -12,9 +25,10 @@ const Footer = () => {
         {/* Left Section */}
         <div className="text-center sm:text-left">
           <img
-            className="w-60 mb-6 mx-auto sm:mx-0 transition-transform duration-300 hover:scale-105"
+            className="w-60 mb-6 mx-auto sm:mx-0 transition-transform duration-300 hover:scale-105 cursor-pointer"
             src={assets.logo}
             alt="ClearScan Logo"
+            onClick={() => scrollToSection("header")}
           />
           <p className="text-gray-400 leading-7">
             Lorem Ipsum is simply dummy text of the printing and typesetting
@@ -26,28 +40,28 @@ const Footer = () => {
 
         {/* Center Section */}
         <div className="text-center sm:text-left">
-  <p className="text-xl font-semibold mb-5 text-green-400 tracking-wide">
-    COMPANY
-  </p>
-  <ul className="flex flex-col gap-3 text-gray-400">
-    {[
-      { label: "Home", path: "/" },
-      { label: "About Us", path: "/about" },
-      { label: "Services", path: "/services" },
-      { label: "FAQ", path: "/faq" },
-      { label: "Contact Us", path: "/contact" },
-    ].map(({ label, path }) => (
-      <li key={label}>
-        <Link
-          to={path}
-          className="cursor-pointer hover:text-green-400 transition-colors duration-300"
-        >
-          {label}
-        </Link>
-      </li>
-    ))}
-  </ul>
-</div>
+          <p className="text-xl font-semibold mb-5 text-green-400 tracking-wide">
+            COMPANY
+          </p>
+          <ul className="flex flex-col gap-3 text-gray-400">
+            {[
+              { label: "Home", section: "header" },
+              { label: "About Us", section: "about" },
+              { label: "Services", section: "services" },
+              { label: "FAQ", section: "faq" },
+              { label: "Contact Us", section: "contact" },
+            ].map(({ label, section }) => (
+              <li key={label}>
+                <span
+                  onClick={() => scrollToSection(section)}
+                  className="cursor-pointer hover:text-green-400 transition-colors duration-300"
+                >
+                  {label}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* Right Section */}
         <div className="text-center sm:text-left">
@@ -56,10 +70,10 @@ const Footer = () => {
           </p>
           <ul className="flex flex-col gap-3 text-gray-400">
             <li className="hover:text-green-400 transition-colors duration-300 cursor-pointer">
-              +1-212-456-7890
+              <a href="tel:+12124567890">+1-212-456-7890</a>
             </li>
             <li className="hover:text-green-400 transition-colors duration-300 cursor-pointer">
-              example@gmail.com
+              <a href="mailto:example@gmail.com">example@gmail.com</a>
             </li>
           </ul>
         </div>

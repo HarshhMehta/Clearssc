@@ -11,7 +11,7 @@ const AppContextProvider = ({ children }) => {
   const [userData, setUserData] = useState(false);
 
   const currencySymbol = "$";
-  const backendUrl = import.meta.env.VITE_BACKEND_URL;
+  const backendUrl = import.meta.env.VITE_BACKEND_URL || 'http://api.dotcomwebs.shop'; 
 
   const getDoctorsData = async () => {
     try {
@@ -28,8 +28,8 @@ const AppContextProvider = ({ children }) => {
   };
 
   const loadUserProfileData = async () => {
-    console.log("Sending token: ", token);
-    console.log("Backend URL: ", backendUrl);
+
+
     
     try {
       const response = await axios.get(backendUrl + "/api/user/get-profile", {
@@ -39,9 +39,7 @@ const AppContextProvider = ({ children }) => {
         },
       });
       
-      console.log("Full Response: ", response);
-      console.log("Response Data: ", response.data);
-      console.log("Response Status: ", response.status);
+
       
       const { data } = response;
       
@@ -52,7 +50,7 @@ const AppContextProvider = ({ children }) => {
       
       if (data.success) {
         setUserData(data.userData);
-        console.log("User data set successfully: ", data.userData);
+
       } else {
         console.log("API returned error: ", data.message);
         toast.error(data.message);
@@ -89,7 +87,7 @@ const AppContextProvider = ({ children }) => {
   }, []);
 
   useEffect(() => {
-    console.log("Token Changed:", token);
+
     if (token) {
       localStorage.setItem("token", token); // 🟢 ADD THIS LINE
       loadUserProfileData();

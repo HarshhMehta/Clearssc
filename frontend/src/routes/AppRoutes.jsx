@@ -12,6 +12,8 @@ import Appointment from "../pages/Appointment.jsx";
 import Layout from "./Layout.jsx";
 import PaymentSuccess from '../pages/PaymentSuccess.jsx';
 import FAQ from "../Components/faq.jsx";
+import MriReferralRequest from "../pages/MriReferralRequest.jsx";
+import MultiDoctorAppointment from "../pages/MultiDoctorAppointment.jsx";
 
 
 
@@ -33,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: "/faq",
         element: <FAQ />,
+      },
+      {
+        path: "/Form",
+        element: <MriReferralRequest />,
       },
       {
         path: "contact",
@@ -61,6 +67,10 @@ const router = createBrowserRouter([
       {
         path: "payment-success",
         element: <PaymentSuccess />,
+      },
+      {
+        path: "Multidoctor",
+        element: <MultiDoctorAppointment />,
       },
     ],
   },

@@ -29,8 +29,7 @@ const Doctors = () => {
       <div className="text-center space-y-4 max-w-3xl mx-auto mb-10">
         <div className="inline-block w-full">
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-black leading-tight">
-            Our Top Services
-          </h1>
+                      </h1>
           <div className="w-20 h-1 bg-black rounded-full mt-2 mx-auto"></div>
         </div>
         <p

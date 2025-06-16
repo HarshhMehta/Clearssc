@@ -123,13 +123,20 @@ const updateProfile = async (req, res) => {
 const bookAppointment = async (req, res) => {
   try {
     const userId = req.userId;
-    const { docId, slotTime, slotDate, message } = req.body;
+    const { docId, slotTime, slotDate, message, mriFormData } = req.body; // Ensure mriFormData is passed from frontend
 
-    const docData = await doctorModel.findById(docId).select("-password");
-    if (!docData) {
-      return res.json({ success: false, message: "Doctor not available" });
+    // Step 1: Check if MRI form data exists
+    if (!mriFormData || !mriFormData.surname || !mriFormData.firstName || !mriFormData.dob || !mriFormData.healthCardNumber || !mriFormData.clinicalInformation) {
+      return res.json({ success: false, message: 'Please fill out all the required MRI form fields.' });
     }
 
+    // Step 2: Find the doctor
+    const docData = await doctorModel.findById(docId).select("-password");
+    if (!docData) {
+      return res.json({ success: false, message: "Service not available" });
+    }
+
+    // Step 3: Check if slot is available
     let slots_booked = docData.slots_booked || {};
     if (slots_booked[slotDate]?.includes(slotTime)) {
       return res.json({ success: false, message: "Slot not available" });
@@ -138,10 +145,12 @@ const bookAppointment = async (req, res) => {
     slots_booked[slotDate] = slots_booked[slotDate] || [];
     slots_booked[slotDate].push(slotTime);
 
+    // Step 4: Get user data
     const userData = await userModel.findById(userId).select("-password");
     const docInfo = docData.toObject();
     delete docInfo.slots_booked;
 
+    // Step 5: Create a new appointment and save it
     const newAppointment = new appointmentModel({
       userId,
       docId,
@@ -149,15 +158,20 @@ const bookAppointment = async (req, res) => {
       slotDate,
       userData,
       docData: docInfo,
+      mriFormData,  // Save MRI form data here
       date: Date.now(),
       amount: docData.fees,
       message: message || "",
       payment: false, // Initially false, will be updated when payment is successful
     });
 
+    // Save the new appointment
     await newAppointment.save();
+
+    // Update the doctor's slots
     await doctorModel.findByIdAndUpdate(docId, { slots_booked });
 
+    // Step 6: Return success response
     res.json({ success: true, message: "Appointment Booked", appointmentId: newAppointment._id });
   } catch (error) {
     console.log(error);

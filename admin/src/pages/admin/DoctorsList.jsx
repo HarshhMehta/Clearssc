@@ -87,7 +87,7 @@ const DoctorsList = () => {
 
       {doctors.length === 0 && !loading && (
         <div className="text-center py-8 text-gray-500">
-          <p>No doctors found</p>
+          <p>No Service found</p>
         </div>
       )}
 

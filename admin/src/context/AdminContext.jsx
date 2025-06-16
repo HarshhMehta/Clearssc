@@ -44,7 +44,7 @@ const AdminContextProvider = ({ children }) => {
   useEffect(() => {
     if (aToken && aToken !== "undefined" && aToken !== "null") {
       axios.defaults.headers.common['Authorization'] = `Bearer ${aToken}`;
-      console.log("Axios authorization header set with token:", aToken.substring(0, 20) + "...");
+
     } else {
       delete axios.defaults.headers.common['Authorization'];
       console.log("Axios authorization header cleared");
